@@ -5,6 +5,16 @@
 python train.py
 ```
 
+10.26
+已经修改使用 resnet18，尝试缩小主干网络，减少模型耗时的同时保证模型精度。
+
+resnet网络修改
+```Shell
+...
+        self.conv1_r = nn.Conv2d(1, self.inplanes, kernel_size=7, stride=2, padding=3,
+                               bias=False)
+...
+```
 
 ## TensorRT
 -[TensorRT](https://github.com/wang-xinyu/tensorrtx/tree/master/retinaface)

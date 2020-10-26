@@ -6,7 +6,7 @@ import torch.optim as optim
 import torch.backends.cudnn as cudnn
 import argparse
 import torch.utils.data as data
-from data import WiderFaceDetection, detection_collate, preproc, cfg_mnet, cfg_re50
+from data import WiderFaceDetection, detection_collate, preproc, cfg_mnet, cfg_re18
 from layers.modules import MultiBoxLoss
 from layers.functions.prior_box import PriorBox
 from tqdm import tqdm
@@ -17,11 +17,11 @@ from models.retinaface import RetinaFace
 
 parser = argparse.ArgumentParser(description='Retinaface Training')
 parser.add_argument('--training_dataset', default='/home/disk/zhy/widerface/label.txt', help='Training dataset directory')
-parser.add_argument('--network', default='resnet50', help='Backbone network mobile0.25 or resnet50')
+parser.add_argument('--network', default='resnet18', help='Backbone network mobile0.25 or resnet18')
 parser.add_argument('--num_workers', default=4, type=int, help='Number of workers used in dataloading')
-parser.add_argument('--lr', '--learning-rate', default=1e-4, type=float, help='initial learning rate')
+parser.add_argument('--lr', '--learning-rate', default=1e-3, type=float, help='initial learning rate')
 parser.add_argument('--momentum', default=0.9, type=float, help='momentum')
-parser.add_argument('--resume_net', default='./weights/Resnet50_Final_1.pth', help='resume net for retraining')
+parser.add_argument('--resume_net', default='./weights/Resnet18_epoch_5.pth', help='resume net for retraining')
 # parser.add_argument('--resume_net', default=None, help='resume net for retraining')
 parser.add_argument('--resume_epoch', default=0, type=int, help='resume iter for retraining')
 parser.add_argument('--weight_decay', default=5e-4, type=float, help='Weight decay for SGD')
@@ -35,8 +35,8 @@ if not os.path.exists(args.save_folder):
 cfg = None
 if args.network == "mobile0.25":
     cfg = cfg_mnet
-elif args.network == "resnet50":
-    cfg = cfg_re50
+elif args.network == "resnet18":
+    cfg = cfg_re18
 
 rgb_mean = (128)
 # rgb_mean = (104, 117, 123) # bgr order
@@ -106,7 +106,7 @@ def train():
     epoch_size = math.ceil(len(dataset) / batch_size)
     max_iter = max_epoch * epoch_size
 
-    stepvalues = (cfg['decay1'] * epoch_size, cfg['decay2'] * epoch_size, cfg['decay3'] * epoch_size)
+    stepvalues = (cfg['decay1'] * epoch_size, cfg['decay2'] * epoch_size, cfg['decay3'] * epoch_size, cfg['decay4'] * epoch_size, cfg['decay5'] * epoch_size)
     step_index = 0
 
     if args.resume_epoch > 0:

@@ -20,24 +20,26 @@ cfg_mnet = {
     'out_channel': 64
 }
 
-cfg_re50 = {
-    'name': 'Resnet50',
+cfg_re18 = {
+    'name': 'Resnet18',
     'min_sizes': [[6, 12.8], [12.8, 49.1], [49.1, 85.3]],
     'steps': [8, 16, 32],
     'variance': [0.1, 0.2],
     'clip': False,
     'loc_weight': 2.0,
     'gpu_train': True,
-    'batch_size': 32,
-    'ngpu': 4,
+    'batch_size': 64,
+    'ngpu': 1,
     'epoch': 100,
     'decay1': 5,
     'decay2': 10,
     'decay3': 15,
+    'decay4': 25,
+    'decay5': 35,
     'image_size': 128,
     'pretrain': True,
     'return_layers': {'layer2': 1, 'layer3': 2, 'layer4': 3},
-    'in_channel': 256,
-    'out_channel': 256
+    'in_channel': 64,
+    'out_channel': 32
 }
 

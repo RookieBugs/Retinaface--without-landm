@@ -4,7 +4,7 @@ import argparse
 import torch
 import torch.backends.cudnn as cudnn
 import numpy as np
-from data import cfg_mnet, cfg_re50
+from data import cfg_mnet, cfg_re18
 from layers.functions.prior_box import PriorBox
 from utils.nms.py_cpu_nms import py_cpu_nms
 import cv2
@@ -14,9 +14,9 @@ from utils.timer import Timer
 
 
 parser = argparse.ArgumentParser(description='Retinaface')
-parser.add_argument('-m', '--trained_model', default='./weights/Resnet50_epoch_50.pth',
+parser.add_argument('-m', '--trained_model', default='./weights/Resnet18_epoch_30.pth',
                     type=str, help='Trained state_dict file path to open')
-parser.add_argument('--network', default='resnet50', help='Backbone network mobile0.25 or resnet50')
+parser.add_argument('--network', default='resnet18', help='Backbone network mobile0.25 or resnet18')
 parser.add_argument('--origin_size', default=False, type=str, help='Whether use origin image size to evaluate')
 parser.add_argument('--save_folder', default='./widerface_evaluate/widerface_txt/', type=str, help='Dir to save txt results')
 parser.add_argument('--cpu', action="store_true", default=False, help='Use cpu inference')
@@ -72,10 +72,11 @@ if __name__ == '__main__':
     cfg = None
     if args.network == "mobile0.25":
         cfg = cfg_mnet
-    elif args.network == "resnet50":
-        cfg = cfg_re50
+    elif args.network == "resnet18":
+        cfg = cfg_re18
     # net and model
     net = RetinaFace(cfg=cfg, phase = 'test')
+    print(net)
     net = load_model(net, args.trained_model, args.cpu)
     net.eval()  #test ，训练时 写作net.train()
     print('Finished loading model!')
@@ -121,6 +122,7 @@ if __name__ == '__main__':
             im_size_min = np.min(im_shape[0:2])
             im_size_max = np.max(im_shape[0:2])
             resize = float(target_size) / float(im_size_min)
+            scale = torch.Tensor([img_raw.shape[1], img_raw.shape[0], img_raw.shape[1], img_raw.shape[0]])
             # prevent bigger axis from being more than max_size:
             if np.round(resize * im_size_max) > max_size:
                 resize = float(max_size) / float(im_size_max)
@@ -131,7 +133,7 @@ if __name__ == '__main__':
                 img = cv2.resize(img_raw, (128,128), interpolation=cv2.INTER_LINEAR)
                 # img = cv2.resize(img_raw, None, None, fx=resize, fy=resize, interpolation=cv2.INTER_LINEAR)
             im_height, im_width= img.shape
-            scale = torch.Tensor([img.shape[1], img.shape[0], img.shape[1], img.shape[0]])
+            # scale = torch.Tensor([img.shape[1], img.shape[0], img.shape[1], img.shape[0]])
             img = img[:,:,np.newaxis]-(128)
             # img -= (104, 117, 123)
             img = img.transpose(2, 0, 1)
@@ -151,14 +153,14 @@ if __name__ == '__main__':
             prior_data = priors.data
             boxes = decode(loc.data.squeeze(0), prior_data, cfg['variance'])
             print(boxes.shape)
-            boxes = boxes * scale / resize
+            boxes = boxes * scale 
             boxes = boxes.cpu().numpy()
             scores = conf.squeeze(0).data.cpu().numpy()[:, 1]
             # landms = decode_landm(landms.data.squeeze(0), prior_data, cfg['variance'])
-            scale1 = torch.Tensor([img.shape[3], img.shape[2], img.shape[3], img.shape[2],
-                                   img.shape[3], img.shape[2], img.shape[3], img.shape[2],
-                                   img.shape[3], img.shape[2]])
-            scale1 = scale1.to(device)
+            # scale1 = torch.Tensor([img.shape[3], img.shape[2], img.shape[3], img.shape[2],
+            #                        img.shape[3], img.shape[2], img.shape[3], img.shape[2],
+            #                        img.shape[3], img.shape[2]])
+            # scale1 = scale1.to(device)
             # landms = landms * scale1 / resize
             # landms = landms.cpu().numpy()
 

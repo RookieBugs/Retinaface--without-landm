@@ -15,6 +15,8 @@ resnet网络修改
                                bias=False)
 ...
 ```
+11.11
+retinaface对人脸的分类需要负样本的补充才能正常训练（必须要）
 
 ## TensorRT
 -[TensorRT](https://github.com/wang-xinyu/tensorrtx/tree/master/retinaface)
